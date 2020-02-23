@@ -1,6 +1,6 @@
 # mxnovel
 
-A Clojure library designed to ... well, that part is up to you.
+Web Scraping NovelMania.
 
 ## Usage
 

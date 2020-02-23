@@ -1,18 +1,26 @@
 (ns mxnovel.core
-  (:require [net.cgrand.enlive-html :as html]))
+  (:require [net.cgrand.enlive-html :as html]
+            [org.httpkit.client :as http]
+            [clojure.java.io :as IO]))
 
-(def urlNovel "http://novelmania.com.br/chinesa/ri-indice/ri-capitulo-60/")
+(defn get-dom
+  []
+  (html/html-snippet
+    (:body @(http/get "http://novelmania.com.br/chinesa/ri-indice/ri-capitulo-60/" {:insecure? true}))))
 
-(defn fetch-url [url]
-  (html/html-resource (java.net.URL. url)))
+(defn extract-text
+  [dom]
+  (map
+    (comp first :content) (html/select dom [:div.entry-content :span])))
 
-(def getHTML (fetch-url urlNovel))
+(defn write-file [text]
+  (with-open [w (IO/writer  "D:/Programacao/Texts/caps.txt" :append true)]
+    (.write w (pr-str text))))
 
-(def getBodyTitle (html/select getHTML [:div.inside-article :h1]))
-(def getTitle (map (comp :content) getBodyTitle))
+(defn -main
+  []
+  (let [titles (extract-text (get-dom))]
+    (write-file titles)
+    (println "Writing Success!")))
 
-(def getBodyText (html/select getHTML [:div.entry-content :span]))
-(def getText (map (comp :content) getBodyText))
-
-(println getTitle)
-(println getText)
+(-main)
